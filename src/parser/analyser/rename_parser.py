@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
+SOURCE_RE = re.compile(r"B-Global|[Bb]aha|[Ss]entai|CR|[Bb]ilibili|AT-X|Web")
+
 
 @dataclass
 class DownloadInfo:
@@ -79,9 +81,30 @@ class DownloadParser:
                 )
                 return new_name
 
-    @staticmethod
-    def rename_none(info: DownloadInfo):
-        return info.name
+    # @staticmethod
+    # def rename_none(info: DownloadInfo):
+    #     return info.name
+    def rename_none(self, info: DownloadInfo):
+        for rule in self.rules:
+            match_obj = re.match(rule, info.file_name, re.I)
+            if match_obj is not None:
+                # new_name = re.sub(
+                #     r"[\[|【\]|】]",
+                #     "",
+                #     f"{info.folder_name} S{info.season}E{match_obj.group(2)}",
+                # )
+                new_name = re.sub(
+                    r"[\[|【\]|】]",
+                    "",
+                    f"S{info.season} - {match_obj.group(2)}",
+                )
+                # print(new_name)
+                group = re.split(r"[\[|【\]|】]", info.name)
+                group = group[1] if group else ""
+                source = SOURCE_RE.search(info.name)
+                source = str("_"+source.group(0)) if source else ""
+                new_name=f"[{group}{source}] {info.folder_name} {new_name} {info.suffix}"
+                return new_name
 
     def download_rename(self, name, folder_name, season, suffix, method):
         rename_info = self.rename_init(name, folder_name, season, suffix)
@@ -98,5 +121,5 @@ class DownloadParser:
 if __name__ == "__main__":
     name = "[Lilith-Raws] Tate no Yuusha no Nariagari S02 - 02 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4]"
     rename = DownloadParser()
-    new_name = rename.download_rename(name, "异世界舅舅（2022）", 1, ".mp4", "normal")
+    new_name = rename.download_rename(name, "异世界舅舅（2022）", 1, ".mp4", "none")
     print(new_name)
