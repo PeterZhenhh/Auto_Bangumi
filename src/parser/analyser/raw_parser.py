@@ -146,7 +146,7 @@ class RawParser:
             episode = int(raw_episode.group())
         sub, dpi, source = self.find_tags(other)  # 剩余信息处理
         # 去除英文名称括号
-        name_en = re.sub(re.compile(r'[(](.*?)[)]', re.S),'',name_en)
+        name_en = re.sub(re.compile(r'[(](.*?)[)]', re.S),'',name_en).strip()
         return name_en, name_zh, name_jp, season, season_raw, episode, sub, dpi, source, group
 
     def analyse(self, raw: str) -> Episode or None:
