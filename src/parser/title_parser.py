@@ -41,7 +41,7 @@ class TitleParser:
             title_search = episode.title_zh if episode.title_zh else episode.title_en
             title_raw = episode.title_en if episode.title_en else episode.title_zh
             if settings.enable_tmdb:
-                official_title, _season = self.tmdb_parser(title_search, episode.season)
+                official_title, _season = self.tmdb_parser(title_raw, episode.season)
             else:
                 official_title = title_search if settings.language == "zh" else title_raw
                 _season = episode.season
