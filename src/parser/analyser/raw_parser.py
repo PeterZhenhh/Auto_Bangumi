@@ -120,7 +120,7 @@ class RawParser:
         return RawParser.clean_sub(sub), resolution, source
 
     @staticmethod
-    def clean_sub(sub: str | None) -> str | None:
+    def clean_sub(sub):
         if sub is None:
             return sub
         return re.sub(r"_MP4|_MKV", "", sub)
@@ -145,6 +145,8 @@ class RawParser:
         if raw_episode is not None:
             episode = int(raw_episode.group())
         sub, dpi, source = self.find_tags(other)  # 剩余信息处理
+        # 去除英文名称括号
+        name_en = re.sub(re.compile(r'[(](.*?)[)]', re.S),'',name_en)
         return name_en, name_zh, name_jp, season, season_raw, episode, sub, dpi, source, group
 
     def analyse(self, raw: str) -> Episode or None:
@@ -162,6 +164,6 @@ class RawParser:
 
 if __name__ == "__main__":
     test = RawParser()
-    test_txt = "[梦蓝字幕组]New Doraemon 哆啦A梦新番[716][2022.07.23][AVC][10080P][GB_JP]"
+    test_txt = "[NC-Raws] 恋爱FLOPS / Renai Flops (Love Flops) - 12 (Sentai 1920x1080 AVC AAC MKV) "
     ep = test.analyse(test_txt)
     print(f"en:{ep.title_en}, zh:{ep.title_zh}, jp:{ep.title_jp}, group:{ep.group}")
