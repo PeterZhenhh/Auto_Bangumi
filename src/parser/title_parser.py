@@ -18,21 +18,29 @@ class TitleParser:
     def download_parser(self, download_raw, folder_name, season, suffix, method=settings.method):
         return self._download_parser.download_rename(download_raw, folder_name, season, suffix, method)
 
-    def tmdb_parser(self, title: str, season: int):
+    # titles=[title_raw, title_search] 英文名 中文名
+    def tmdb_parser(self, titles: list, season: int):
         official_title, tmdb_season = None, None
-        try:
-            tmdb_info = self._tmdb_parser.tmdb_search(title)
-            logger.debug(f"TMDB Matched, official title is {tmdb_info.title_zh}")
-        except Exception as e:
-            logger.debug(e)
-            logger.warning("Not Matched with TMDB")
-            return title, season
+        fetchSuccess = False
+        for title in titles:
+            try:
+                tmdb_info = self._tmdb_parser.tmdb_search(title)
+                fetchSuccess = True
+                logger.info(
+                    f"TMDB Matched, official title is {tmdb_info.title_zh}")
+                break
+            except Exception as e:
+                logger.debug(e)
+                logger.warning("Not Matched with TMDB")
+                # return title, season
+        if not fetchSuccess:
+            return titles[1], season
         if settings.language == "zh":
             official_title = f"{tmdb_info.title_zh} ({tmdb_info.year_number})"
         elif settings.language == "jp":
             official_title = f"{tmdb_info.title_jp} ({tmdb_info.year_number})"
         tmdb_season = tmdb_info.last_season if tmdb_info.last_season else season
-        official_title = official_title if official_title else title
+        official_title = official_title if official_title else titles[1]
         return official_title, tmdb_season
 
     def return_dict(self, _raw: str):
@@ -41,7 +49,8 @@ class TitleParser:
             title_search = episode.title_zh if episode.title_zh else episode.title_en
             title_raw = episode.title_en if episode.title_en else episode.title_zh
             if settings.enable_tmdb:
-                official_title, _season = self.tmdb_parser(title_raw, episode.season)
+                official_title, _season = self.tmdb_parser(
+                    [title_raw, title_search], episode.season)
             else:
                 official_title = title_search if settings.language == "zh" else title_raw
                 _season = episode.season
