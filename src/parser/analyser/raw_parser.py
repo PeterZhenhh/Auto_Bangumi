@@ -133,7 +133,8 @@ class RawParser:
         season_info, episode_info, other = list(map(
             lambda x: x.strip(), match_obj.groups()
         ))
-        raw_name, season_raw, season = self.season_process(season_info)  # 处理 第n季
+        raw_name, season_raw, season = self.season_process(
+            season_info)  # 处理 第n季
         name_en, name_zh, name_jp = "", "", ""
         try:
             name_en, name_zh, name_jp = self.name_process(raw_name)  # 处理 名字
@@ -146,7 +147,9 @@ class RawParser:
             episode = int(raw_episode.group())
         sub, dpi, source = self.find_tags(other)  # 剩余信息处理
         # 去除英文名称括号
-        name_en = re.sub(re.compile(r'[(](.*?)[)]', re.S),'',name_en).strip()
+        if(name_en):
+            name_en = re.sub(re.compile(
+                r'[(](.*?)[)]', re.S), '', name_en).strip()
         return name_en, name_zh, name_jp, season, season_raw, episode, sub, dpi, source, group
 
     def analyse(self, raw: str) -> Episode or None:
@@ -166,4 +169,5 @@ if __name__ == "__main__":
     test = RawParser()
     test_txt = "[NC-Raws] 恋爱FLOPS / Renai Flops (Love Flops) - 12 (Sentai 1920x1080 AVC AAC MKV) "
     ep = test.analyse(test_txt)
-    print(f"en:{ep.title_en}, zh:{ep.title_zh}, jp:{ep.title_jp}, group:{ep.group}")
+    # print(f"en:{ep.title_en}, zh:{ep.title_zh}, jp:{ep.title_jp}, group:{ep.group}")
+    print(ep)
